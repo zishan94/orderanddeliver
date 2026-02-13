@@ -1,25 +1,30 @@
-# 💨 Shisha Delivery
+# 💊 Order & Deliver
 
-A full-featured delivery app for shisha tobacco — built with Expo, React Native, Express, and SQLite.
+A premium delivery app built with Expo React Native — featuring real-time tracking, OpenStreetMap maps, and a luxury UI.
 
 ## Features
 
 - **3 User Roles:** Consumer, Approver, Driver
 - **Phone auth** (demo mode — any 6-digit code works)
+- **Staff login** (username + password for approvers & drivers)
+- **17 products** across 6 categories (Classic, Fruity, Mint, Sweet, Mix, Premium)
 - **Real-time** order updates, driver tracking, and chat via WebSocket
-- **Maps** with OpenStreetMap tiles and OSRM routing
-- **Beautiful dark theme** with gradient accents
-- **Production-quality** code — TypeScript throughout
+- **OpenStreetMap** with Leaflet — fully open source, no Google
+- **OSRM routing** for delivery ETAs
+- **Luxury light theme** — clean whites, subtle shadows, elegant typography
+- **Splash animation** with brand identity
+- **TypeScript** throughout
+
+## Screenshots
+
+💊 Luxury light design with warm off-whites, white cards, dark navy accents, and subtle shadows.
 
 ## Quick Start
 
 ### 1. Install dependencies
 
 ```bash
-# App dependencies
 npm install
-
-# Server dependencies
 cd server && npm install && cd ..
 ```
 
@@ -27,10 +32,10 @@ cd server && npm install && cd ..
 
 ```bash
 cd server
-npx ts-node index.ts
+npx tsx index.ts
 ```
 
-Server runs on `http://localhost:3001`. SQLite DB auto-creates with seed data (5 products, demo users).
+Server runs on `http://localhost:3001`. SQLite DB auto-creates with 17 products and demo staff accounts.
 
 ### 3. Start the Expo app
 
@@ -38,36 +43,47 @@ Server runs on `http://localhost:3001`. SQLite DB auto-creates with seed data (5
 npx expo start
 ```
 
-Press `w` for web, `a` for Android, or `i` for iOS.
+Scan the QR code with Expo Go (Android) or press `w` for web.
 
-### 4. Demo Login
+### 4. Demo Accounts
 
-1. Enter any phone number (e.g., `+41791111111`)
-2. Enter any 6-digit code (e.g., `123456`)
-3. Choose your role: Consumer, Approver, or Driver
+**Consumer:** Enter any phone number → any 6-digit code → start browsing
 
-**Pre-seeded accounts:**
-- `+41791234567` — Demo Approver
-- `+41791234568` — Demo Driver
+**Staff:**
+| Role | Username | Password |
+|------|----------|----------|
+| Approver | `approver1` | `admin123` |
+| Driver | `driver1` | `driver123` |
+| Driver | `driver2` | `driver123` |
 
 ## Architecture
 
 ```
-shisha-delivery/
+orderanddeliver/
 ├── app/                  # Expo Router screens
-│   ├── (auth)/          # Login + setup
-│   ├── consumer/        # Browse, order, track
-│   ├── approver/        # Pending, active, map
-│   └── driver/          # Deliveries, route, map
-├── components/          # Reusable UI components
-├── contexts/            # Auth, Socket, Location
-├── hooks/               # useApi, useOSRM
-├── constants/           # Theme, config
+│   ├── (auth)/          # Landing, phone login, staff login
+│   ├── consumer/        # Browse, order, track, orders, profile
+│   ├── approver/        # Dashboard, active orders, chat, profile
+│   └── driver/          # Deliveries, route, profile
+├── components/          # MapView (Leaflet), OrderCard, ChatView, etc.
+├── contexts/            # Auth, Socket, Location providers
+├── constants/           # Theme (luxury light), config
 └── server/              # Express + Socket.io + SQLite
     ├── index.ts         # Server entry
-    ├── db.ts            # Database + seed data
+    ├── db.ts            # Database + seed data (17 products)
     └── routes/          # REST API endpoints
 ```
+
+## Product Categories
+
+| Category | Products | Price Range |
+|----------|----------|-------------|
+| 🍎 Classic | Al Fakher Double Apple, Grape, Adalya Two Apples | CHF 0.08-0.09/g |
+| 🍓 Fruity | Adalya Love 66, Lady Killer, Holster Ice Kaktus, Fumari Tangelo | CHF 0.09-0.11/g |
+| 🌿 Mint | Tangiers Cane Mint, Al Fakher Mint | CHF 0.07-0.12/g |
+| 🍬 Sweet | Fumari White Gummy Bear, Blueberry Muffin | CHF 0.11/g |
+| 🍹 Mix | Starbuzz Blue Mist, Pirates Cave, Al Fakher Watermelon Mint | CHF 0.08-0.12/g |
+| ⭐ Premium | Darkside Supernova, Deep Dive, Tangiers Kashmir Peach | CHF 0.13-0.14/g |
 
 ## API Endpoints
 
@@ -75,32 +91,26 @@ shisha-delivery/
 |--------|------|-------------|
 | POST | `/api/auth/request-code` | Request SMS code (demo) |
 | POST | `/api/auth/verify` | Verify code + login |
-| POST | `/api/auth/profile` | Set name + role |
-| GET | `/api/products` | List products |
-| POST | `/api/orders` | Create order |
-| GET | `/api/orders/pending` | Pending orders |
+| POST | `/api/auth/staff-login` | Staff username/password login |
+| GET | `/api/products` | List all products |
+| POST | `/api/orders` | Place an order |
+| GET | `/api/orders/pending` | Pending orders (approver) |
 | GET | `/api/orders/active` | Active orders |
 | POST | `/api/orders/:id/approve` | Approve order |
 | POST | `/api/orders/:id/reject` | Reject order |
-| POST | `/api/orders/batch-approve` | Batch approve |
 | POST | `/api/orders/:id/assign` | Assign driver |
 | POST | `/api/orders/:id/delivering` | Start delivery |
 | POST | `/api/orders/:id/delivered` | Complete delivery |
 | GET/POST | `/api/messages` | Chat messages |
-| POST | `/api/drivers/location` | Update driver GPS |
-
-## WebSocket Events
-
-- `order:created` / `order:new` — New order notifications
-- `order:status` / `order:updated` — Status changes
-- `driver:location` / `driver:location-update` — GPS tracking
-- `chat:message` / `chat:new-message` — Real-time chat
-- `notification` — In-app push notifications
 
 ## Tech Stack
 
-- **Frontend:** Expo SDK 52, React Native, TypeScript, Expo Router
+- **Frontend:** Expo SDK 54, React Native, TypeScript, Expo Router
 - **Backend:** Express.js, Socket.io, better-sqlite3
-- **Maps:** react-native-maps + OpenStreetMap tiles
+- **Maps:** Leaflet + OpenStreetMap (fully open source)
 - **Routing:** OSRM (router.project-osrm.org)
-- **UI:** expo-linear-gradient, react-native-reanimated
+- **UI:** Luxury light theme, react-native-reanimated, expo-linear-gradient
+
+## License
+
+MIT
